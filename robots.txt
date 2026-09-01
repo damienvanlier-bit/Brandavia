@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://damienvanlier-bit.github.io/Brandavia/sitemap.xml
