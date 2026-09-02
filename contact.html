@@ -33,20 +33,20 @@
       <li><a href="werkwijze.html">Werkwijze</a></li>
       <li class="nav-dropdown">
         <button class="nav-dropdown-toggle" type="button" aria-expanded="false" aria-haspopup="true">
-          Pakketten
+          Diensten
           <svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg>
         </button>
         <ul class="nav-submenu">
           <li><a href="pakketten.html">Website</a></li>
-          <li><a href="advertenties.html">Advertenties</a></li>
           <li><a href="reviews.html">Reviews</a></li>
+          <li><a href="advertenties.html">Advertenties</a></li>
         </ul>
       </li>
-      <li><a href="kaartjes.html">Kaartjes</a></li>
+      <li><a href="kaartjes.html">Reviewkaartjes</a></li>
       <li><a href="over-ons.html">Over ons &amp; FAQ</a></li>
       <li><a href="contact.html" aria-current="page">Contact</a></li>
     </ul>
-    <a class="nav-cta" href="contact.html">Plan een kennismaking</a>
+    <a class="nav-cta" href="contact.html?aanvraag=reputatiecheck">Gratis reputatiecheck</a>
     <div class="nav-icons">
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="Donker thema in-/uitschakelen">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
@@ -107,16 +107,27 @@
             <label for="interesse">Interesse</label>
             <select id="interesse" name="interesse" required aria-required="true">
               <option value="">Kies een optie</option>
+              <option value="Gratis reputatiecheck">Gratis reputatiecheck</option>
+              <option value="Reviews">Reviews</option>
               <option value="Website">Website</option>
               <option value="Advertenties">Advertenties</option>
-              <option value="Reviews">Reviews</option>
               <option value="Nog niet zeker">Nog niet zeker</option>
             </select>
             <span class="field-error">Geef aan waarin u geïnteresseerd bent.</span>
           </div>
+          <div class="form-row">
+            <div class="field" id="fieldWebsite">
+              <label for="website">Website <span class="opt">(optioneel)</span></label>
+              <input type="url" id="website" name="website" autocomplete="url" placeholder="https://">
+            </div>
+            <div class="field" id="fieldGoogleprofiel">
+              <label for="googleprofiel">Link Google-bedrijfsprofiel <span class="opt">(optioneel)</span></label>
+              <input type="url" id="googleprofiel" name="googleprofiel" placeholder="https://g.page/...">
+            </div>
+          </div>
           <div class="field" id="fieldBericht">
             <label for="bericht">Bericht</label>
-            <textarea id="bericht" name="bericht" required aria-required="true" placeholder="Vertel kort over uw bedrijf en waar u hulp bij zoekt."></textarea>
+            <textarea id="bericht" name="bericht" required aria-required="true" placeholder="Vertel kort over uw bedrijf en, bij een reputatiecheck, wat u vooral wilt verbeteren."></textarea>
             <span class="field-error">Laat een kort bericht achter.</span>
           </div>
           <div class="field-check" id="fieldPrivacy">
@@ -260,12 +271,38 @@
         'Bedrijfsnaam: ' + data.get('bedrijfsnaam') + '\n' +
         'E-mailadres: ' + data.get('email') + '\n' +
         'Telefoonnummer: ' + (data.get('telefoon') || '-') + '\n' +
-        'Interesse: ' + data.get('interesse') + '\n\n' +
-        'Bericht:\n' + data.get('bericht');
+        'Interesse: ' + data.get('interesse') + '\n' +
+        (data.get('website') ? 'Website: ' + data.get('website') + '\n' : '') +
+        (data.get('googleprofiel') ? 'Google-bedrijfsprofiel: ' + data.get('googleprofiel') + '\n' : '') +
+        '\nBericht:\n' + data.get('bericht');
       var mailto = 'mailto:damienvanlier@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
       successMsg.classList.add('show');
       window.location.href = mailto;
     });
+  })();
+
+  // Leest ?aanvraag=... in de URL en selecteert automatisch het bijbehorende onderwerp,
+  // zodat CTA's elders op de site (bv. "Gratis reputatiecheck") direct het juiste onderwerp invullen.
+  (function(){
+    var select = document.getElementById('interesse');
+    if(!select) return;
+    var params = new URLSearchParams(window.location.search);
+    var aanvraag = params.get('aanvraag');
+    if(!aanvraag) return;
+    var map = {
+      'reputatiecheck': 'Gratis reputatiecheck',
+      'Reviews': 'Reviews',
+      'Website': 'Website',
+      'Advertenties': 'Advertenties'
+    };
+    var value = map[aanvraag];
+    if(value){
+      select.value = value;
+      var bericht = document.getElementById('bericht');
+      if(value === 'Gratis reputatiecheck' && bericht && !bericht.value){
+        bericht.placeholder = 'Vertel kort over uw bedrijf en, indien bekend, uw website en/of Google-bedrijfsprofiel.';
+      }
+    }
   })();
 </script>
 </body>
