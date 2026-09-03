@@ -111,6 +111,7 @@
               <option value="Reviews">Reviews</option>
               <option value="Website">Website</option>
               <option value="Advertenties">Advertenties</option>
+              <option value="QR/NFC-reviewkaartjes">QR/NFC-reviewkaartjes</option>
               <option value="Nog niet zeker">Nog niet zeker</option>
             </select>
             <span class="field-error">Geef aan waarin u geïnteresseerd bent.</span>
@@ -224,11 +225,9 @@
   })();
 
   // Contactformulier — verstuurt via Web3Forms (geen eigen server nodig) en stuurt de bezoeker
-  // daarna door naar een echte bedankpagina. TODO (Damien): vervang WEB3FORMS_ACCESS_KEY hieronder
-  // door je eigen gratis access key van https://web3forms.com (registreer met je e-mailadres,
-  // de key komt direct in je inbox) voordat dit formulier live gebruikt wordt.
+  // daarna door naar een echte bedankpagina.
   (function(){
-    var WEB3FORMS_ACCESS_KEY = 'VUL_HIER_JE_WEB3FORMS_ACCESS_KEY_IN';
+    var WEB3FORMS_ACCESS_KEY = '8e9bc0cc-e631-4611-ac2a-7cef1c385cf7';
     var form = document.getElementById('contactForm');
     if(!form) return;
     var errorMsg = document.getElementById('formError');
