@@ -76,8 +76,8 @@
   <div class="wrap">
     <div class="contact-layout">
       <div class="contact-card">
-        <div id="formSuccess" class="form-message success" role="status">Bedankt voor uw bericht. Uw e-mailprogramma wordt geopend met een vooraf ingevuld bericht — controleer dit en verstuur het vanuit uw eigen e-mailprogramma.</div>
         <div id="formError" class="form-message error" role="alert">Er ontbreekt nog informatie. Controleer de gemarkeerde velden hieronder.</div>
+        <div id="formSubmitError" class="form-message error" role="alert">Er ging iets mis bij het versturen. Probeer het opnieuw, of mail rechtstreeks naar <a href="mailto:damienvanlier@gmail.com" style="color:inherit; text-decoration:underline;">damienvanlier@gmail.com</a>.</div>
 
         <form class="contact-form" id="contactForm" novalidate>
           <div class="form-row">
@@ -223,15 +223,19 @@
     });
   })();
 
-  // Contactformulier — geen backend beschikbaar: bouwt een mailto:-bericht met de ingevulde gegevens.
-  // TODO (Damien): vervang dit door een echte formulierdienst (bv. Formspree) zodra die is ingesteld,
-  // zodat bezoekers niet afhankelijk zijn van hun eigen e-mailprogramma.
+  // Contactformulier — verstuurt via Web3Forms (geen eigen server nodig) en stuurt de bezoeker
+  // daarna door naar een echte bedankpagina. TODO (Damien): vervang WEB3FORMS_ACCESS_KEY hieronder
+  // door je eigen gratis access key van https://web3forms.com (registreer met je e-mailadres,
+  // de key komt direct in je inbox) voordat dit formulier live gebruikt wordt.
   (function(){
+    var WEB3FORMS_ACCESS_KEY = 'VUL_HIER_JE_WEB3FORMS_ACCESS_KEY_IN';
     var form = document.getElementById('contactForm');
     if(!form) return;
-    var successMsg = document.getElementById('formSuccess');
     var errorMsg = document.getElementById('formError');
+    var submitErrorMsg = document.getElementById('formSubmitError');
     var fields = ['naam','bedrijfsnaam','email','interesse','bericht'];
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var submitBtnDefaultHTML = submitBtn.innerHTML;
 
     function clearInvalid(){
       fields.forEach(function(name){
@@ -245,8 +249,8 @@
     form.addEventListener('submit', function(e){
       e.preventDefault();
       clearInvalid();
-      successMsg.classList.remove('show');
       errorMsg.classList.remove('show');
+      submitErrorMsg.classList.remove('show');
 
       var valid = form.checkValidity();
       if(!valid){
@@ -265,19 +269,41 @@
       }
 
       var data = new FormData(form);
-      var subject = 'Contactformulier BrandAvia — ' + data.get('interesse');
-      var body =
-        'Naam: ' + data.get('naam') + '\n' +
-        'Bedrijfsnaam: ' + data.get('bedrijfsnaam') + '\n' +
-        'E-mailadres: ' + data.get('email') + '\n' +
-        'Telefoonnummer: ' + (data.get('telefoon') || '-') + '\n' +
-        'Interesse: ' + data.get('interesse') + '\n' +
-        (data.get('website') ? 'Website: ' + data.get('website') + '\n' : '') +
-        (data.get('googleprofiel') ? 'Google-bedrijfsprofiel: ' + data.get('googleprofiel') + '\n' : '') +
-        '\nBericht:\n' + data.get('bericht');
-      var mailto = 'mailto:damienvanlier@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-      successMsg.classList.add('show');
-      window.location.href = mailto;
+      var payload = {
+        access_key: WEB3FORMS_ACCESS_KEY,
+        subject: 'Contactformulier BrandAvia — ' + data.get('interesse'),
+        from_name: 'BrandAvia website',
+        naam: data.get('naam'),
+        bedrijfsnaam: data.get('bedrijfsnaam'),
+        email: data.get('email'),
+        telefoonnummer: data.get('telefoon') || '-',
+        interesse: data.get('interesse'),
+        website: data.get('website') || '-',
+        google_bedrijfsprofiel: data.get('googleprofiel') || '-',
+        bericht: data.get('bericht')
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Bezig met versturen…';
+
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+        .then(function(res){ return res.json(); })
+        .then(function(result){
+          if(result && result.success){
+            window.location.href = 'bedankt.html';
+            return;
+          }
+          throw new Error((result && result.message) || 'Onbekende fout bij versturen.');
+        })
+        .catch(function(){
+          submitErrorMsg.classList.add('show');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = submitBtnDefaultHTML;
+        });
     });
   })();
 
