@@ -1,0 +1,14 @@
+RewriteEngine On
+
+# Oude links met .html erin doorsturen naar de nette versie zonder .html
+RewriteCond %{THE_REQUEST} \s/+(.+)\.html[\s?] [NC]
+RewriteRule ^ /%1 [R=301,L]
+
+# /index (en dus ook oude /index.html-links, via de regel hierboven) naar de homepage /
+RewriteRule ^index/?$ / [R=301,L]
+
+# Achter de schermen alsnog het juiste .html-bestand serveren voor de nette URL
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^(.*)$ $1.html [L]
